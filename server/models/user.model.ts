@@ -43,7 +43,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please enter your password"],
+      // required: [true, "Please enter your password"], removing this bcz during social authentication we don't need password
       minlength: [6, "Password must be at least 6 characters"],
       select: false,
     },
@@ -81,14 +81,18 @@ userSchema.pre<IUser>('save', async function (next) {
 
 // Sign access token when user log in
 userSchema.methods.SignAccessToken = function(){
-  return jwt.sign({id: this._id}, process.env.ACCESS_TOKEN || "")
+  return jwt.sign({id: this._id}, process.env.ACCESS_TOKEN_SECRET || "", {
+    expiresIn: "5m"
+  })
 }
 
 // Sign refresh token
 userSchema.methods.SignRefreshToken = function (){
-  return jwt.sign({id: this._id}, process.env.REFRESH_TOKEN || "");
+  return jwt.sign({id: this._id}, process.env.REFRESH_TOKEN_SECRET || "", {
+    expiresIn: "3d"
+  });
 }
- 
+
 // to compare password
 userSchema.methods.comparePassword = async function (
   enteredPassword: string

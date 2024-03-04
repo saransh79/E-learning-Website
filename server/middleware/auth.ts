@@ -13,7 +13,7 @@ export const isAuthenticated= CatchAsyncError(async(req: Request, res: Response,
         return next(new ErrorHandler("Please login to access this resource", 400));
     }
 
-    const decoded= jwt.verify(access_token, process.env.ACCESS_TOKEN as string) as JwtPayload;
+    const decoded= jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
 
     if(!decoded){
         return next(new ErrorHandler("Access token is not valid", 400));
@@ -28,4 +28,15 @@ export const isAuthenticated= CatchAsyncError(async(req: Request, res: Response,
 
     req.user= JSON.parse(user);
     next();
-})
+});
+
+
+// check validation of role of users
+export const authorizeRoles = (...roles : string[]) =>{
+    return (req: Request, res: Response, next: NextFunction)=>{
+        if(!roles.includes(req.user?.role || "")){
+            return next(new ErrorHandler(`Role: ${req.user?.role} is not allowed to access this resource`, 403));
+        }
+        next();
+    }
+};
