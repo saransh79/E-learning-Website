@@ -3,7 +3,7 @@ import userModel from "../../models/user.model";
 import ErrorHandler from "../../utils/errorHandler";
 import { CatchAsyncError } from "../../middleware/catchAsyncError";
 import { sendToken } from "../../utils/jwt";
-import { getUserByID } from "../../services/user.service";
+import { getAllUsersService, getUserByID } from "../../services/user.service";
 
 interface ILoginUser {
   email: string;
@@ -79,3 +79,12 @@ export const socialAuth = CatchAsyncError(
     }
   }
 );
+
+// get all users by admin
+export const getAllUsersByAdmin= CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+  try {
+    getAllUsersService(res);
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+})

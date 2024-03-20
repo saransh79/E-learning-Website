@@ -29,7 +29,7 @@ export const sendMail = async (options: EmailOptions):Promise<void> =>{
     const html:string = await ejs.renderFile(templatePath, data);
 
     const mailOptions= {
-        from : "sachinhbtuk@gmail.com",
+        from : process.env.SMTP_MAIL,
         to: email,
         subject,
         html

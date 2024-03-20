@@ -6,6 +6,7 @@ import courseModel from "../../models/course.model";
 import mongoose from "mongoose";
 import ErrorHandler from "../../utils/errorHandler";
 import { sendMail } from "../../utils/sendMail";
+import notificationModel from "../../models/notification.model";
 
 interface IAddQuestionData {
   question: string;
@@ -40,6 +41,14 @@ export const addQuestion = CatchAsyncError(
 
       courseContent.questions.push(newQuestion);
 
+      // create a notification
+      await notificationModel.create({
+        user: req.user?._id,
+        title: "New Question Recieved",
+        message: `You have a new question in ${courseContent.title}`,
+      })
+
+      // save updated course
       await course?.save();
 
       res.status(200).json({
@@ -101,6 +110,11 @@ export const addAnswer = CatchAsyncError(
       // if user is same who asked question then simply send notification
       if (req.user?._id === question.user._id) {
         // create a notification
+        await notificationModel.create({
+          user: req.user?._id,
+          title: "New Question Reply Recieved",
+          message: `You have a new question reply in ${courseContent.title}`
+        })
       } else {
         const data = {
           name: question.user.name,

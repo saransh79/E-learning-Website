@@ -6,6 +6,7 @@ import userModel from "../../models/user.model";
 import ErrorHandler from "../../utils/errorHandler";
 import { redis } from "../../utils/redis";
 import { accessTokenOptions, refreshTokenOptions } from "../../utils/jwt";
+import { updateUserRoleService } from "../../services/user.service";
 
 // update user name and email info
 interface IUpdateUserInfo {
@@ -179,6 +180,19 @@ export const deleteProfilePicture = CatchAsyncError(
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// update user role
+export const updateUserRole = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id, role } = req.body;
+
+      updateUserRoleService(res, id, role);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
     }
   }
 );

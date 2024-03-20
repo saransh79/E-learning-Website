@@ -3,6 +3,7 @@ import { CatchAsyncError } from "../../middleware/catchAsyncError";
 import courseModel from "../../models/course.model";
 import ErrorHandler from "../../utils/errorHandler";
 import { redis } from "../../utils/redis";
+import { getAllCoursesService } from "../../services/course.service";
 
 // to get single course details
 export const getSingleCourse = CatchAsyncError(
@@ -72,28 +73,45 @@ export const getAllCourses = CatchAsyncError(
   }
 );
 
-
 // get course content - only for valid user
-export const getCourseByUser= CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+export const getCourseByUser = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userCourseList = req.user?.courses;
-        const courseId = req.params.id;
+      const userCourseList = req.user?.courses;
+      const courseId = req.params.id;
 
-        const courseExists = userCourseList?.find((course: any)=> course._id === courseId);
+      const courseExists = userCourseList?.find(
+        (course: any) => course._id === courseId
+      );
 
-        if(!courseExists){
-            return next(new ErrorHandler("You are not allowed to access this course", 404));
-        }
+      if (!courseExists) {
+        return next(
+          new ErrorHandler("You are not allowed to access this course", 404)
+        );
+      }
 
-        const course= await courseModel.findById(courseId);
+      const course = await courseModel.findById(courseId);
 
-        const content = course?.courseData;
+      const content = course?.courseData;
 
-        res.status(200).json({
-            success: true,
-            content
-        })
+      res.status(200).json({
+        success: true,
+        content,
+      });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-})
+  }
+);
+
+// get all courses (by admin)
+
+export const getAllCoursesByAdmin = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      getAllCoursesService(res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
